@@ -18,7 +18,7 @@
 
 - name: Add karaf host key to known_hosts.
   known_hosts:
-    path: /home/vagrant/.ssh/known_hosts
+    path: "/home/{{ ansible_user }}/.ssh/known_hosts"
     name: "[localhost]:8101"
     key: "{{ karaf_host_key.stdout }}"
     state: present
