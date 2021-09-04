@@ -1,0 +1,29 @@
+---
+# Enhance security for openhab installation.
+- name: Set custom HTTP port.
+  lineinfile:
+    path: "{{ openhab_config_file}}"
+    regexp: '^openhab_http_port='
+    state: present
+    line: 'openhab_http_port="{{ openhab_http_port }}"'
+  notify:
+    - FreeBSD restart openhab
+    - Debian restart openhab
+
+- name: Set custom HTTPS port.
+  lineinfile:
+    path: "{{ openhab_config_file }}"
+    regexp: '^openhab_https_port='
+    state: present
+    line: 'openhab_https_port="{{ openhab_https_port }}"'
+  notify:
+    - FreeBSD restart openhab
+    - Debian restart openhab
+
+#- name: Start openhab service.
+#  command: service openhab start
+#  ignore_errors: yes
+#  when: "{{ lookup('pipe', 'service openhab status' | quote ) }}" == "openhab is not running"
+
+- name: Flush handlers.
+  meta: flush_handlers

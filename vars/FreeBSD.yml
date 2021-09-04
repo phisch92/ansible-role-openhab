@@ -1,0 +1,18 @@
+---
+ansible_python_interpreter: "/usr/local/bin/python"
+
+openhab_config_file: "/etc/rc.conf"
+
+karaf_user_file: "/var/db/openhab/userdata/etc/users.properties"
+
+java_packages_FreeBSD:
+  - java/openjdk16
+
+java_version_FreeBSD: '11.0.0'
+
+openhab_packages_FreeBSD:
+  - openhab
+  - openhab-addons
+  - nano
+
+openhab_service: openhab

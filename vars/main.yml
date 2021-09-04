@@ -1,0 +1,11 @@
+---
+# vars file for ansible-role-openhab
+openhab_http_port: 8082
+openhab_https_port: 8123
+
+karaf_user: "openhab"
+karaf_pwd: "habopen"
+
+openhab_users:
+  - {name: admin-philipp, role: administrator, password: 'testpassword123'}
+  - {name: user-philipp, role: user, password: 'testpassword321'}

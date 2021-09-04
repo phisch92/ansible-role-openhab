@@ -1,0 +1,77 @@
+---
+- name: Gather the package facts.
+  package_facts:
+    manager: "auto"
+
+- name: Check if openHAB is installed.
+  debug:
+    msg: |
+      "{{ ansible_facts.packages['openhab'] | length }}
+      versions of openhab are installed."
+
+- name: Check if java is installed.
+  debug:
+    msg: |
+      "{{ ansible_facts.packages['java'] | length }}
+      versions of java are installed."
+
+# - name: Check if openHAB is already installed
+#   stat: path=/etc/init.d/openhab
+#   register: openhab_installed
+
+- name: Register java version.
+  shell: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/"//g'
+  register: java_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Check if java version fulfills prerequisites.
+  debug:
+    msg: "Java version is higher than Java 11"
+  when: >
+    (ansible_facts.packages['java'] | length > 0) and
+    java_version.stdout is version ( '11.0.0' , '>' )
+
+- name: Add Azul's public key
+  apt_key:
+    keyserver: hkp://keyserver.ubuntu.com:80
+    id: '0xB1998361219BD9C9'
+    state: present
+  when: >
+    'java' not in ansible_facts.packages or
+    java_version.stdout is version( '11.0.0', '<')
+
+- name: Download and install Azul APT repo to the list of sources
+  apt_repository:
+    filename: 'zulu'
+    repo: deb http://repos.azulsystems.com/ubuntu stable main
+    state: present
+    update_cache: yes
+  when: >
+   'java' not in ansible_facts.packages or
+   java_version.stdout is version( '11.0.0', '<')
+
+- name: Install Java11 (Azul)
+  apt:
+    name: zulu-11
+    state: present
+  when: >
+    'java' not in ansible_facts.packages or
+    java_version.stdout is version( '11.0.0', '<')
+
+- name: Add openHAB repository key
+  apt_key:
+    url: https://openhab.jfrog.io/artifactory/api/gpg/key/public
+    state: present
+
+- name: Add openHAB Stable Repository to apt sources
+  apt_repository:
+    repo: deb https://openhab.jfrog.io/artifactory/openhab-linuxpkg stable main
+    state: present
+    update_cache: yes
+
+- name: Ensure openHAB packages are installed.
+  apt:
+    name: "{{ openhab_packages_debian }}"
+    state: present
+  notify: Debian restart openhab

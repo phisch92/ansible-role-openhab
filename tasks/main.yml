@@ -1,0 +1,19 @@
+---
+# tasks file for ansible-role-openhab
+
+# Variable configuration.
+- include_tasks: variables.yml
+
+# Create group and user for openhab.
+- include_tasks: add_users.yml
+
+# Setup/install tasks
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include_tasks: setup-FreeBSD.yml
+  when: ansible_os_family == 'FreeBSD'
+
+- include_tasks: security.yml
+
+- include_tasks: karaf.yml

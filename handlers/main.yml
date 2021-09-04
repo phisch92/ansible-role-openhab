@@ -1,0 +1,15 @@
+---
+- name: FreeBSD restart openhab
+  command: "service {{ openhab_service }} restart"
+  args:
+    warn: false
+  become: yes
+  when: ansible_os_family == 'FreeBSD'
+
+- name: Debian restart openhab
+  service:
+    name: "{{ openhab_service }}"
+    enabled: yes
+    state: restarted
+  become: yes
+  when: ansible_os_family == 'Debian'

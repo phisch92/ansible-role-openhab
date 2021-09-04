@@ -1,0 +1,12 @@
+---
+- name: Create group openhab.
+  group:
+    name: openhab
+    state: present
+
+- name: Create user openhab.
+  user:
+    name: openhab
+    group: openhab
+    create_home: no
+    state: present

@@ -1,0 +1,55 @@
+---
+- name: Install package sshpass.
+  package:
+    name: sshpass
+    state: present
+
+- name: Wait for openhab to start karaf console.
+  wait_for:
+    host: 127.0.0.1
+    port: 8101
+    delay: 10
+    state: present
+
+- name: Get karaf host key.
+  command: "ssh-keyscan -trsa -p 8101 localhost"
+  register: karaf_host_key
+  changed_when: false
+
+- name: Add karaf host key to known_hosts.
+  known_hosts:
+    path: /home/vagrant/.ssh/known_hosts
+    name: "[localhost]:8101"
+    key: "{{ karaf_host_key.stdout }}"
+    state: present
+
+- name: Get list of registered openhab-users.
+  script: >
+    karaf.sh -u {{ karaf_user }} -p {{ karaf_pwd }}
+    -c "list"
+  become: yes
+  become_user: openhab
+  register: users
+
+- name: Save list of registered openhab-users.
+  set_fact:
+    openhab_registered_users: "{{ users.stdout_lines }}"
+
+- name: List registered openhab-users.
+  debug:
+    msg: "{{ openhab_registered_users }}"
+
+- name: Register openhab-users.
+  script: >
+    karaf.sh -u {{ karaf_user }} -p {{ karaf_pwd }}
+    -c "add {{ item.name }} {{ item.password }} {{ item.role }}"
+  with_items: "{{ openhab_users }}"
+  become: yes
+  become_user: openhab
+  register: result
+  changed_when: '"The user already exists." not in result.stdout'
+
+- name: Remove package sshpass.
+  package:
+    name: sshpass
+    state: absent

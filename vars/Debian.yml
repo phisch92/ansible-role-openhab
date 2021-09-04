@@ -1,0 +1,9 @@
+---
+openhab_config_file: "/etc/default/openhab"
+
+
+openhab_packages_debian:
+  - openhab
+  - openhab-addons
+
+openhab_service: openhab

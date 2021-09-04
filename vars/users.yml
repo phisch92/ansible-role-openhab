@@ -1,0 +1,7 @@
+---
+karaf_user: "openhab"
+karaf_pwd: "habopen"
+
+openhab_users:
+  - {name: admin-philipp, role: administrator, password: 'testpassword123'}
+  - {name: user-philipp, role: user, password: 'testpassword321'}

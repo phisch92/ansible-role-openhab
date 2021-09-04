@@ -1,0 +1,80 @@
+---
+# Tasks to install openHAB and Java on FreeBSD
+
+- name: Check if openHAB is already installed.
+  stat: path=/etc/rc.d/openhab
+  register: openhab_installed
+
+- name: Check if java is already installed.
+  command: "java -version"
+  register: java_version
+  ignore_errors: true
+  changed_when: false
+
+# - name: Debug java_version
+#   debug:
+#     msg: "{{ java_version.stderr }}"
+
+- name: Get current java version.
+  set_fact:
+    installed_java_version: "{{ java_version.stderr | regex_search(regexp,'\\1') }}"
+  vars:
+    regexp: '^.*version.+"(\d+\.\d+\.\d+).*'
+  when: java_version is success
+
+- name: Installed java version.
+  debug:
+    msg: "{{ installed_java_version }}"
+  when: java_version is success and (installed_java_version | length > 0)
+
+- name: Check if java version fulfills prerequisites.
+  debug:
+    msg: "Java version is higher than Java11 ({{ installed_java_version[0] }})"
+  when: >
+    java_version is success and
+    installed_java_version[0] is version ( '11.0.0' , '>' )
+
+- name: Install Java.
+  pkgng:
+    name: "{{ java_packages_FreeBSD }}"
+    state: present
+  when: >
+    java_version is failed or
+    installed_java_version[0] is version( '11.0.0', '<')
+
+- name: "Java: Mount proc"
+  mount:
+    name: /proc
+    fstype: procfs
+    src: proc
+    opts: rw
+    state: mounted
+  when: >
+    java_version is failed or
+    installed_java_version[0] is version( '11.0.0', '<')
+
+- name: "Java: Mount fdesc"
+  mount:
+    name: /dev/fd
+    fstype: fdescfs
+    src: fdesc
+    opts: rw
+    state: mounted
+  when: >
+    java_version is failed or
+    installed_java_version[0] is version( '11.0.0', '<')
+
+- name: Ensure openHAB packages are installed.
+  pkgng:
+    name: "{{ openhab_packages_FreeBSD }}"
+    state: present
+
+- name: Add openhab service to /etc/rc.conf.
+  blockinfile:
+    path: /etc/rc.conf
+    block: |
+      openhab_enable="YES"
+      openhab_java_opts="-Djava.net.preferIPv4Stack=true"
+    insertafter: EOF
+    state: present
+  notify: FreeBSD restart openhab
