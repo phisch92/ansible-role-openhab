@@ -1,7 +1,7 @@
-Role Name
+ansible-role-openhab
 =========
 
-A brief description of the role goes here.
+An Ansible Role that installs [OpenHab3](https://www.openhab.org/) on Debian or FreeBSD.
 
 Requirements
 ------------
