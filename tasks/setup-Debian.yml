@@ -1,19 +1,25 @@
 ---
+- name: Update apt chache if needed.
+  apt: update_cache=true cache_valid_time=3600
+
+- name: Ensure GnuPG is installed for keyserver.
+  apt: name=gnupg state=present
+
 - name: Gather the package facts.
   package_facts:
     manager: "auto"
 
-- name: Check if openHAB is installed.
-  debug:
-    msg: |
-      "{{ ansible_facts.packages['openhab'] | length }}
-      versions of openhab are installed."
+#- name: Check if openHAB is installed.
+#  debug:
+#    msg: |
+#      "{{ ansible_facts.packages['openhab'] | length }}
+#      versions of openhab are installed."
 
-- name: Check if java is installed.
-  debug:
-    msg: |
-      "{{ ansible_facts.packages['java'] | length }}
-      versions of java are installed."
+#- name: Check if java is installed.
+#  debug:
+#    msg: |
+#      "{{ ansible_facts.packages['java'] | length }}
+#      versions of java are installed."
 
 # - name: Check if openHAB is already installed
 #   stat: path=/etc/init.d/openhab
@@ -29,7 +35,7 @@
   debug:
     msg: "Java version is higher than Java 11"
   when: >
-    (ansible_facts.packages['java'] | length > 0) and
+    'java' in ansible_facts.packages and
     java_version.stdout is version ( '11.0.0' , '>' )
 
 - name: Add Azul's public key

@@ -8,5 +8,5 @@
   user:
     name: openhab
     group: openhab
-    create_home: no
+    create_home: yes
     state: present

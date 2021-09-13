@@ -16,9 +16,20 @@
   register: karaf_host_key
   changed_when: false
 
+- name: Ensure file .ssh/known_hosts exists.
+  file:
+    path: "{{ item.path }}"
+    owner: openhab
+    group: openhab
+    mode: '0644'
+    state: "{{ item.state }}"
+  loop:
+    - {path: "/home/openhab/.ssh", state: directory}
+    - {path: "/home/openhab/.ssh/known_hosts", state: touch}
+
 - name: Add karaf host key to known_hosts.
   known_hosts:
-    path: "/home/{{ ansible_user }}/.ssh/known_hosts"
+    path: "/home/openhab/.ssh/known_hosts"
     name: "[localhost]:8101"
     key: "{{ karaf_host_key.stdout }}"
     state: present
