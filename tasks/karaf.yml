@@ -34,12 +34,19 @@
     key: "{{ karaf_host_key.stdout }}"
     state: present
 
+- name: Transfer custome script karaf.sh to server.
+  copy:
+    src: karaf.sh
+    dest: /home/openhab/karaf.sh
+    owner: openhab
+    group: openhab
+    mode: '0700'
+
 - name: Get list of registered openhab-users.
-  script: >
-    karaf.sh -u {{ karaf_user }} -p {{ karaf_pwd }}
+  command: >
+    /home/openhab/karaf.sh -u {{ karaf_user }} -p {{ karaf_pwd }}
     -c "list"
   become: yes
-  become_user: openhab
   register: users
 
 - name: Save list of registered openhab-users.
@@ -51,12 +58,11 @@
     msg: "{{ openhab_registered_users }}"
 
 - name: Register openhab-users.
-  script: >
-    karaf.sh -u {{ karaf_user }} -p {{ karaf_pwd }}
+  command: >
+    /home/openhab/karaf.sh -u {{ karaf_user }} -p {{ karaf_pwd }}
     -c "add {{ item.name }} {{ item.password }} {{ item.role }}"
   with_items: "{{ openhab_users }}"
   become: yes
-  become_user: openhab
   register: result
   changed_when: '"The user already exists." not in result.stdout'
 
